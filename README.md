@@ -11,7 +11,7 @@ Contains:
 - Background workers
 - Blazor infrastructure classes
 
-To launch sample project and open swagger page, run commands
+To launch sample project and open swagger page, run following commands
 
 ```sh
 cd sample/SampleWebApp/
