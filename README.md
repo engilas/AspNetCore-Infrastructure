@@ -5,6 +5,7 @@ Base template and infrastructure classes for asp.net core web services, blazor p
 
 Contains:
 - Swagger api documentation
+- Dynamic module system
 - Serilog logger integrated with Microsoft ILogger interface
 - MySQL base repository classes with Dapper ORM
 - Base classes for unit and integration testing
