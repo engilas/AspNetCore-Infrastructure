@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using AsyncKeyedLock;
 using Infrastructure.Extensions;
 using Infrastructure.Logging;
 using Microsoft.Extensions.Caching.Memory;
@@ -12,7 +13,11 @@ namespace Infrastructure.Utils.Async
     /// </summary>
     public class WlMemoryCache : IWlMemoryCache
     {
-        private readonly AsyncKeyLock _asyncLock = new AsyncKeyLock();
+        private readonly AsyncKeyedLocker<object> _asyncLock = new(o =>
+        {
+            o.PoolSize = 20;
+            o.PoolInitialFill = 1;
+        });
         private readonly TimeSpan _defaultExpiration = TimeSpan.FromHours(1);
         private readonly ILogger<WlMemoryCache> _logger;
         private readonly MemoryCache _memoryCache;
@@ -71,7 +76,7 @@ namespace Infrastructure.Utils.Async
         {
             factory.ThrowIfNullArgument(nameof(factory));
             if (!_memoryCache.TryGetValue(key, out T value))
-                using (await _asyncLock.LockAsync(key))
+                using (await _asyncLock.LockAsync(key).ConfigureAwait(false))
                 {
                     if (!_memoryCache.TryGetValue(key, out value))
                     {
