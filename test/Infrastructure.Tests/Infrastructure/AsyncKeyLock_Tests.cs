@@ -1,15 +1,19 @@
-﻿using System;
+﻿using AsyncKeyedLock;
+using Shouldly;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Infrastructure.Utils.Async;
-using Shouldly;
 using Xunit;
 
 namespace Infrastructure.Tests.Infrastructure
 {
     public class AsyncKeyLock_Tests
     {
-        private readonly AsyncKeyLock _keyLock = new AsyncKeyLock();
+        private readonly AsyncKeyedLocker<string> _keyLock = new AsyncKeyedLocker<string>(o =>
+        {
+            o.PoolSize = 20;
+            o.PoolInitialFill = 1;
+        });
 
         private class Container
         {
@@ -47,7 +51,7 @@ namespace Infrastructure.Tests.Infrastructure
             {
                 tasks.Add(Task.Run(async () =>
                 {
-                    using (await _keyLock.LockAsync(key1))
+                    using (await _keyLock.LockAsync(key1).ConfigureAwait(false))
                     {
                         if (container1.IsInitialized()) return;
                         container1.Initialize();
@@ -55,7 +59,7 @@ namespace Infrastructure.Tests.Infrastructure
                 }));
                 tasks.Add(Task.Run(async () =>
                 {
-                    using (await _keyLock.LockAsync(key2))
+                    using (await _keyLock.LockAsync(key2).ConfigureAwait(false))
                     {
                         if (container2.IsInitialized()) return;
                         container2.Initialize();
